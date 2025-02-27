@@ -50,7 +50,7 @@ def chiffrus():
         elif entr[i] in rep:
             aff.append('orange')
         else:
-            aff.append('white')
+            aff.append('black')
     group_frame = Frame(result_frame)
     group_frame.pack(padx=5, pady=5, anchor="w")
         
