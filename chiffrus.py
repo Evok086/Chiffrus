@@ -1,5 +1,5 @@
 from tkinter import *
-from random import randint, sample
+from random import randint
 
 def str_to_lst(string):
     lst = []
@@ -10,7 +10,7 @@ def str_to_lst(string):
 def random_nb():
     rd = []
     for i in range(6):
-        rd.append(randint(1, 10))
+        rd.append(randint(0, 9))
     return rd
 
 
@@ -20,53 +20,59 @@ def reset_game():
     attempt = 0
     for widget in result_frame.winfo_children():
         widget.destroy()
-    red_text.config(text="")
-    green_text.config(text="")
+    win_text = Label(window, text="", fg="green", font=('Helvetica', 24))
+    win_text.pack(padx=10, pady=10)
+    lost_text = Label(window, text="", fg="red", font=('Helvetica', 24))
+    lost_text.pack(padx=10, pady=10)
     button_test.config(state=NORMAL)
     replay_button.pack_forget()
     enter.delete(0, END)
 
 rep = random_nb()
-
+print(rep)
 attempt = 0
 
 window = Tk()
 
-window.title("Chiffrus")
+bg = PhotoImage(file="chiffrus.png")
 
-canvas = Canvas(window, width=150, height=50)
-canvas.pack()
+# Show image using label
+label1 = Label(window, image=bg)
+label1.place(x=0, y=0)
+
+window.title("Chiffrus")
 
 enter = Entry(window)
 enter.pack()
 
+nb_nbs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+for i in range(10):
+    for j in range(6):
+        if rep[j] == i:
+            nb_nbs[i] += 1
+print(nb_nbs)
 
 def chiffrus():
     global attempt
     if len(enter.get()) != 6:
-        red_text.config(text="Please enter a 6 numbers.")
+        test_text = Label(window, text="Please enter a 6 numbers.", fg="red", font=('Helvetica', 24))
+        test_text.pack(padx=10, pady=10)
         return
     entr = str_to_lst(enter.get())
     colors = ['black','black','black','black','black','black']
-    studied = []
+    studied = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for i in range(6):
         if entr[i] == rep[i]:
             colors[i] = 'green'
-            studied.append(entr[i])
+            studied[i] += 1
     for i in range(6):
-        too_much = True
-        nb_in_rep = 0
-        nb_in_nbs = 0
-        for j in range(6):
-            if entr[i] == rep[j]:
-                nb_in_rep += 1
-            if entr[i] == entr[j]:
-                nb_in_nbs += 1
-        if nb_in_rep <= nb_in_nbs:
-            too_much = False
-        if entr[i] in rep and too_much:
+        y_or_n = True
+        if studied[entr[i]] >= nb_nbs[entr[i]]:
+            y_or_n = False
+        if colors[i] != 'green' and entr[i] in rep and y_or_n:
             colors[i] = 'orange'
             studied.append(entr[i])
+
     group_frame = Frame(result_frame)
     group_frame.pack(padx=5, pady=5, anchor="w")
         
@@ -76,11 +82,13 @@ def chiffrus():
     attempt += 1
 
     if entr == rep:
-        green_text.config(text="You won!")
+        win_text = Label(window, text="You won!", fg="green", font=('Helvetica', 24))
+        win_text.pack(padx=10, pady=10)
         button_test.config(state=DISABLED)
         replay_button.pack(padx=5, pady=5)
-    elif attempt == 5:
-        red_text.config(text="You lost!")
+    elif attempt == 6:
+        lost_text = Label(window, text="You lost!", fg="red", font=('Helvetica', 24))
+        lost_text.pack(padx=10, pady=10)
         button_test.config(state=DISABLED)
         replay_button.pack(padx=5, pady=5)
 
@@ -88,12 +96,6 @@ button_test = Button(window, text='Test this numbers', command=chiffrus)
 button_test.pack(side=TOP, padx=5, pady=5)
 
 replay_button = Button(window, text="Replay", command=reset_game)
-
-red_text = Label(window, text="", fg="red", font=('Helvetica', 24))
-red_text.pack(padx=10, pady=10)
-
-green_text = Label(window, text="", fg="green", font=('Helvetica', 24))
-green_text.pack(padx=10, pady=10)
 
 result_frame = Frame(window)
 result_frame.pack(padx=10, pady=10)
