@@ -1,107 +1,140 @@
 from tkinter import *
 from random import randint
 
-def str_to_lst(string):
-    lst = []
-    for i in range(6):
-        lst.append(int(string[i]))
-    return lst
-
-def random_nb():
-    rd = []
-    for i in range(6):
-        rd.append(randint(0, 9))
-    return rd
-
-
-def reset_game():
-    global rep, attempt
-    rep = random_nb()
-    attempt = 0
-    for widget in result_frame.winfo_children():
-        widget.destroy()
-    win_text = Label(window, text="", fg="green", font=('Helvetica', 24))
-    win_text.pack(padx=10, pady=10)
-    lost_text = Label(window, text="", fg="red", font=('Helvetica', 24))
-    lost_text.pack(padx=10, pady=10)
-    button_test.config(state=NORMAL)
-    replay_button.pack_forget()
-    enter.delete(0, END)
-
-rep = random_nb()
-print(rep)
 attempt = 0
+solution = []
+nbs_solution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+def game():
+    global attempt
+    def str_uto_lst(string):
+        lst = []
+        for i in range(6):
+            lst.append(int(string[i]))
+        return lst
+
+    def define_solution():
+        global nbs_solution
+        global solution
+        solution = []
+        for i in range(6):
+            solution.append(randint(0, 9))
+        nbs_solution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(10):
+            for j in range(6):
+                if solution[j] == i:
+                    nbs_solution[i] += 1
+
+    def reset_game():
+        global attempt
+        define_solution()
+        attempt = 0
+        for widget in result_frame.winfo_children():
+            widget.destroy()
+        for widget in window.winfo_children():
+            if isinstance(widget, Label) and widget['fg'] in ('green', 'red'):
+                widget.destroy()
+        button_test.config(state=NORMAL)
+        replay_button.pack_forget()
+        enter.delete(0, END)
+
+    def define_colors(entr):
+        global nbs_solution, solution
+        colors = ['black', 'black', 'black', 'black', 'black', 'black']
+        studied = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(6):
+            if entr[i] == solution[i]:
+                colors[i] = 'green'
+                studied[entr[i]] += 1
+        for i in range(6):
+            y_or_n = True
+            if studied[entr[i]] >= nbs_solution[entr[i]]:
+                y_or_n = False
+            if colors[i] != 'green' and entr[i] in solution and y_or_n:
+                colors[i] = 'orange'
+                studied[entr[i]] += 1
+        return colors
+
+    def show_results(entr, colors):
+        group_frame = Frame(result_frame, bg="lightyellow")
+        group_frame.pack(padx=5, pady=5, anchor="w")
+
+        for i in range(6):
+            Label(group_frame, text=str(entr[i]), fg=colors[i], font=('Helvetica', 24), bg="lightyellow").pack(side=LEFT,padx=5)
+
+    def chiffrus():
+        global attempt
+        entr = str_to_lst(enter.get())
+        if len(enter.get()) != 6:
+            test_text = Label(window, text="Please enter 6 numbers.", fg="red", font=('Helvetica', 24),
+                              bg="lightyellow")
+            test_text.pack(padx=10, pady=10)
+            return
+        colors = define_colors(entr)
+        show_results(entr, colors)
+        win_or_lost(entr)
+        attempt += 1
+
+    def win_or_lost(entr):
+
+        if entr == solution:
+            win_text = Label(window, text="You won!", fg="green", font=('Helvetica', 24), bg="lightyellow")
+            win_text.pack(padx=10, pady=10)
+            button_test.config(state=DISABLED)
+            replay_button.pack(padx=5, pady=5)
+        elif attempt == 5:
+            lost_text = Label(window, text="You lost!", fg="red", font=('Helvetica', 24), bg="lightyellow")
+            lost_text.pack(padx=10, pady=10)
+            button_test.config(state=DISABLED)
+            replay_button.pack(padx=5, pady=5)
+
+
+    rules_frame.destroy()
+    enter = Entry(window,bg="lightyellow")
+    enter.pack(pady=40)
+
+    define_solution()
+
+    button_test = Button(window, text='Test this numbers', command=chiffrus, bg="lightyellow")
+    button_test.pack(side=TOP, padx=5, pady=5)
+
+    replay_button = Button(window, text="Replay", command=reset_game, bg="lightyellow")
 
 window = Tk()
 
-bg = PhotoImage(file="chiffrus.png")
-
-# Show image using label
-label1 = Label(window, image=bg)
-label1.place(x=0, y=0)
+window.configure(bg="lightyellow")
 
 window.title("Chiffrus")
 
-enter = Entry(window)
-enter.pack()
 
-nb_nbs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-for i in range(10):
-    for j in range(6):
-        if rep[j] == i:
-            nb_nbs[i] += 1
-print(nb_nbs)
+rules_frame = Frame(window, bg="lightyellow")
+rules_frame.pack(padx=10, pady=20)
 
-def chiffrus():
-    global attempt
-    if len(enter.get()) != 6:
-        test_text = Label(window, text="Please enter a 6 numbers.", fg="red", font=('Helvetica', 24))
-        test_text.pack(padx=10, pady=10)
-        return
-    entr = str_to_lst(enter.get())
-    colors = ['black','black','black','black','black','black']
-    studied = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    for i in range(6):
-        if entr[i] == rep[i]:
-            colors[i] = 'green'
-            studied[i] += 1
-    for i in range(6):
-        y_or_n = True
-        if studied[entr[i]] >= nb_nbs[entr[i]]:
-            y_or_n = False
-        if colors[i] != 'green' and entr[i] in rep and y_or_n:
-            colors[i] = 'orange'
-            studied.append(entr[i])
+rules_text = """
+Welcome to the game Chiffrus!
 
-    group_frame = Frame(result_frame)
-    group_frame.pack(padx=5, pady=5, anchor="w")
-        
-    for i in range(6):
-        Label(group_frame, text=str(entr[i]), fg=colors[i], font=('Helvetica', 24)).pack(side=LEFT, padx=5)
-    
-    attempt += 1
+Rules:
+1. Guess a combination of 6 numbers.
+2. Each number is between 0 and 9 and a number can appear several times.
+3. After each attempt:
+- Green: Correct number in the correct position.
+- Orange: Correct number in the wrong position.
+- Black: Incorrect number.
 
-    if entr == rep:
-        win_text = Label(window, text="You won!", fg="green", font=('Helvetica', 24))
-        win_text.pack(padx=10, pady=10)
-        button_test.config(state=DISABLED)
-        replay_button.pack(padx=5, pady=5)
-    elif attempt == 6:
-        lost_text = Label(window, text="You lost!", fg="red", font=('Helvetica', 24))
-        lost_text.pack(padx=10, pady=10)
-        button_test.config(state=DISABLED)
-        replay_button.pack(padx=5, pady=5)
+You have 6 attempts. Good luck!
+"""
 
-button_test = Button(window, text='Test this numbers', command=chiffrus)
-button_test.pack(side=TOP, padx=5, pady=5)
+rules_label = Label(rules_frame, text=rules_text, font=('Helvetica', 14), bg="lightyellow", justify=LEFT)
+rules_label.pack(padx=10, pady=10)
 
-replay_button = Button(window, text="Replay", command=reset_game)
+# Bouton pour masquer les règles et commencer
+start_button = Button(rules_frame, text="OK", command=game, bg="lightyellow", font=('Helvetica', 12))
+start_button.pack(pady=10)
 
-result_frame = Frame(window)
+result_frame = Frame(window, bg="lightyellow")
 result_frame.pack(padx=10, pady=10)
 
-width= window.winfo_screenwidth()
-height= window.winfo_screenheight()
-window.geometry("%dx%d" % (width, height))
+width = window.winfo_screenwidth()
+height = window.winfo_screenheight()
+window.geometry(f"{width}x{height}")
 
 window.mainloop()
