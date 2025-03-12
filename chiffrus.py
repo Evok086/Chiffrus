@@ -5,28 +5,20 @@ attempt = 0
 solution = []
 nbs_solution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 def game():
-    global attempt
-    def str_uto_lst(string):
-        lst = []
-        for i in range(6):
-            lst.append(int(string[i]))
-        return lst
+    global result_frame
+    
+    def str_to_lst(string):
+        return [int(string[i]) for i in range(6)]
 
     def define_solution():
-        global nbs_solution
-        global solution
-        solution = []
-        for i in range(6):
-            solution.append(randint(0, 9))
-        nbs_solution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        for i in range(10):
-            for j in range(6):
-                if solution[j] == i:
-                    nbs_solution[i] += 1
+        global nbs_solution, solution
+        solution = [randint(0, 9) for _ in range(6)]
+        nbs_solution = [solution.count(i) for i in range(10)]
 
     def reset_game():
         global attempt
         define_solution()
+        result_frame.update_idletasks()
         attempt = 0
         for widget in result_frame.winfo_children():
             widget.destroy()
@@ -55,6 +47,7 @@ def game():
         return colors
 
     def show_results(entr, colors):
+        result_frame.update_idletasks()
         group_frame = Frame(result_frame, bg="lightyellow")
         group_frame.pack(padx=5, pady=5, anchor="w")
 
@@ -96,6 +89,9 @@ def game():
 
     button_test = Button(window, text='Test this numbers', command=chiffrus, bg="lightyellow")
     button_test.pack(side=TOP, padx=5, pady=5)
+    
+    result_frame = Frame(window, bg="lightyellow")
+    result_frame.pack(padx=10, pady=10)
 
     replay_button = Button(window, text="Replay", command=reset_game, bg="lightyellow")
 
